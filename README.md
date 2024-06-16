@@ -54,7 +54,7 @@ The configuration uses the default VPC and retrieves subnets associated with a s
    Clone the repository containing this Terraform configuration to your local machine.
 
    ```bash
-   git clone https://github.com/yourusername/your-repository.git
+   git clone https://github.com/emiakia/terraform_eks.git
    cd your-repository
 
 2. **Initialize Terraform**

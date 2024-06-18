@@ -17,13 +17,13 @@ data "aws_subnets" "subnets" {
 
 # IAM Role for EKS Cluster
 module "iam_role_eks_cluster" {
-  source                = "./modules/iam_role"
+  source               = "./modules/iam_role"
   iam_role_description = var.iam_role_description
-  iam_role_name         = var.iam_role_name
-  assume_role_service   = var.assume_role_service
-  policy_version        = var.policy_version
-  policy_action         = var.policy_action
-  policy_effect         = var.policy_effect
+  iam_role_name        = var.iam_role_name
+  assume_role_service  = var.assume_role_service
+  policy_version       = var.policy_version
+  policy_action        = var.policy_action
+  policy_effect        = var.policy_effect
 }
 
 # resource "aws_iam_role" "eks_cluster_role" {
@@ -46,9 +46,9 @@ module "iam_role_eks_cluster" {
 
 # Attach policies to the EKS Cluster Role
 module "iam_role_policy_attachment_eks_cluster_policy" {
-  source      = "./modules/iam_role_policy_attachment"
-  policy_arn  = var.eks_cluster_policy_arn
-  role_name   = module.iam_role_eks_cluster.iam_role_name
+  source     = "./modules/iam_role_policy_attachment"
+  policy_arn = var.eks_cluster_policy_arn
+  role_name  = module.iam_role_eks_cluster.iam_role_name
 }
 
 # resource "aws_iam_role_policy_attachment" "eks_cluster_policy" {
@@ -56,9 +56,9 @@ module "iam_role_policy_attachment_eks_cluster_policy" {
 #   role     = module.iam_role_eks_cluster.iam_role_name
 # }
 module "iam_role_policy_attachment_eks_vpc_policy" {
-  source      = "./modules/iam_role_policy_attachment"
-  policy_arn  = var.vpc_policy_arn
-  role_name   = module.iam_role_eks_cluster.iam_role_name
+  source     = "./modules/iam_role_policy_attachment"
+  policy_arn = var.vpc_policy_arn
+  role_name  = module.iam_role_eks_cluster.iam_role_name
 }
 
 # resource "aws_iam_role_policy_attachment" "eks_vpc_policy" {
@@ -68,13 +68,13 @@ module "iam_role_policy_attachment_eks_vpc_policy" {
 
 # IAM Role for Node Group
 module "iam_role_node_group" {
-  source                = "./modules/iam_role"
-  iam_role_name         = var.iam_role_ng_name
+  source               = "./modules/iam_role"
+  iam_role_name        = var.iam_role_ng_name
   iam_role_description = var.iam_role_ng_description
-  assume_role_service   = var.ng_assume_role_service
-  policy_version        = var.ng_policy_version
-  policy_action         = var.ng_policy_action
-  policy_effect         = var.ng_policy_effect
+  assume_role_service  = var.ng_assume_role_service
+  policy_version       = var.ng_policy_version
+  policy_action        = var.ng_policy_action
+  policy_effect        = var.ng_policy_effect
 }
 
 # resource "aws_iam_role" "eks_node_group_role" {
@@ -100,9 +100,9 @@ module "iam_role_policy_attachment_eks_node_group_policy" {
     "AmazonEKS_CNI_Policy",
     "AmazonEKSWorkerNodePolicy"
   ])
-  source      = "./modules/iam_role_policy_attachment"
-  policy_arn  = "arn:aws:iam::aws:policy/${each.value}"
-  role_name   = module.iam_role_eks_cluster.iam_role_name
+  source     = "./modules/iam_role_policy_attachment"
+  policy_arn = "arn:aws:iam::aws:policy/${each.value}"
+  role_name  = module.iam_role_eks_cluster.iam_role_name
 }
 
 # resource "aws_iam_role_policy_attachment" "node_group_policies" {
@@ -111,20 +111,20 @@ module "iam_role_policy_attachment_eks_node_group_policy" {
 #     "AmazonEKS_CNI_Policy",
 #     "AmazonEKSWorkerNodePolicy"
 #   ])
-  
+
 #   policy_arn = "arn:aws:iam::aws:policy/${each.value}"
 #   role     = module.iam_role_eks_cluster.iam_role_name
 # }
 
 # EKS Cluster
 module "eks_cluster" {
-  source                = "./modules/eks_cluster"
-  eks_name              = var.eks_name
-  eks_version           = var.eks_version
-  eks_role_arn          = module.iam_role_eks_cluster.iam_role_arn
-  eks_subnet_ids        = data.aws_subnets.subnets.ids
+  source                 = "./modules/eks_cluster"
+  eks_name               = var.eks_name
+  eks_version            = var.eks_version
+  eks_role_arn           = module.iam_role_eks_cluster.iam_role_arn
+  eks_subnet_ids         = data.aws_subnets.subnets.ids
   eks_security_group_ids = [module.security_group.sg_id]
-  
+
   eks_depends_on = [
     module.iam_role_policy_attachment_eks_cluster_policy,
     module.iam_role_policy_attachment_eks_vpc_policy
@@ -135,7 +135,7 @@ module "eks_cluster" {
 #   name     = "terraformEKS"
 #   role_arn  = module.iam_role_eks_cluster.iam_role_arn
 #   version   = "1.30"
-  
+
 #   vpc_config {
 #     subnet_ids = data.aws_subnets.subnets.ids
 #     security_group_ids = [aws_security_group.default.id]
@@ -162,7 +162,7 @@ module "eks_node_group" {
   eks_ng_disk_size       = var.eks_ng_disk_size
   eks_ng_ami_type        = var.eks_ng_ami_type
   eks_ng_max_unavailable = var.eks_ng_max_unavailable
-  depends_on = [module.iam_role_policy_attachment_eks_node_group_policy]
+  depends_on             = [module.iam_role_policy_attachment_eks_node_group_policy]
 }
 
 # resource "aws_eks_node_group" "terraform_eks_node_group" {
@@ -190,8 +190,8 @@ module "eks_node_group" {
 
 # Security Group for EKS Nodes (default security group)
 module "security_group" {
-  source          = "./modules/security_group"
-  sg_vpc_id       = data.aws_vpc.specified_vpc.id
+  source    = "./modules/security_group"
+  sg_vpc_id = data.aws_vpc.specified_vpc.id
 }
 
 # resource "aws_security_group" "default" {
